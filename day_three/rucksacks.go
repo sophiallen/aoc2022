@@ -1,13 +1,12 @@
 package day_three
 
 import (
-	"fmt"
 	"bufio"
-
+	"fmt"
 	// "strings"
 )
 
-type Solution struct {}
+type Solution struct{}
 
 func (s Solution) GetDataPath() string {
 	return "day_three/data.txt"
@@ -17,8 +16,8 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 	var (
 		sumOfTypes = 0
 		countGroup = 0
-		badgeSum = 0
-		curGroup = make([]string, 3)
+		badgeSum   = 0
+		curGroup   = make([]string, 3)
 	)
 	// sumOfTypes := 0
 	// curGroup := make([]string, 3)
@@ -28,7 +27,7 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 		text := scanner.Text()
 		// pt 1
 		sumOfTypes += getRucksackPriority(text)
-	
+
 		// part two
 		idx := countGroup % 3
 		curGroup[idx] = text
@@ -67,7 +66,7 @@ func getRucksackPriority(text string) int {
 
 func getBadge(rucksacks []string) rune {
 	accum := map[rune]int{}
-	for _, sack := range(rucksacks) {
+	for _, sack := range rucksacks {
 		accum = incrementUnique(sack, accum)
 	}
 	for letter, count := range accum {
@@ -99,10 +98,10 @@ func splitLine(text string) (string, string) {
 
 func findCommonItem(first string, second string) rune {
 	runeMap := map[rune]bool{}
-	for _, letter := range(first) {
+	for _, letter := range first {
 		runeMap[letter] = true
 	}
-	for _, letter := range(second) {
+	for _, letter := range second {
 		if runeMap[letter] {
 			return letter
 		}
@@ -112,7 +111,7 @@ func findCommonItem(first string, second string) rune {
 
 func getPriority(letter rune) int {
 	val := int(letter)
-	if (letter >= 97) {
+	if letter >= 97 {
 		return val - 96
 	}
 	return val - 38

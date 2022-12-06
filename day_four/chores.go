@@ -1,13 +1,13 @@
 package day_four
 
 import (
-	"fmt"
 	"bufio"
-	"strings"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
-type Solution struct {}
+type Solution struct{}
 
 func (s Solution) GetDataPath() string {
 	return "day_four/data.txt"
@@ -22,7 +22,7 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 		pairs := splitPairs(line)
 		set1 := getBounds(pairs[0])
 		set2 := getBounds(pairs[1])
-		if (completelyContains(set1, set2) || completelyContains(set2, set1)) {
+		if completelyContains(set1, set2) || completelyContains(set2, set1) {
 			sumPairsContained += 1
 			pairsOverlap += 1
 			continue
@@ -40,9 +40,9 @@ func splitPairs(line string) []string {
 }
 
 func getBounds(numstr string) []int {
-	bounds := strings.Split(numstr,"-")
+	bounds := strings.Split(numstr, "-")
 	res := make([]int, 2)
-	for i,n := range bounds {
+	for i, n := range bounds {
 		num, _ := strconv.Atoi(n)
 		res[i] = num
 	}
@@ -50,15 +50,15 @@ func getBounds(numstr string) []int {
 }
 
 func completelyContains(r1 []int, r2 []int) bool {
-	return (r1[0] >= r2[0]  && r1[1] <= r2[1])
+	return (r1[0] >= r2[0] && r1[1] <= r2[1])
 }
 func overLaps(r1 []int, r2 []int) bool {
 	r1Lower := r1[0]
 	r1Upper := r1[1]
 	r2Lower := r2[0]
-	r2Upper := r2[1] 
+	r2Upper := r2[1]
 	if r1Lower <= r2Lower {
-		return r1Upper >= r2Lower 
+		return r1Upper >= r2Lower
 	}
 	// else r1 lower is greater than r2 lower
 	if r1Lower >= r2Lower {

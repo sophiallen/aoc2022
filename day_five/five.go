@@ -1,11 +1,11 @@
 package day_five
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 )
 
-type Solution struct {}
+type Solution struct{}
 
 func (s Solution) GetDataPath() string {
 	return "day_five/test.txt"

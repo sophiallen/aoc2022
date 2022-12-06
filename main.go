@@ -1,14 +1,14 @@
 package main
 
 import (
-    "bufio"
-    "fmt"
-    "os"
-	"aoc2022/day_one"
-	"aoc2022/day_two"
-	"aoc2022/day_three"
-	"aoc2022/day_four"
 	"aoc2022/day_five"
+	"aoc2022/day_four"
+	"aoc2022/day_one"
+	"aoc2022/day_three"
+	"aoc2022/day_two"
+	"bufio"
+	"fmt"
+	"os"
 )
 
 type Solvable interface {
@@ -35,9 +35,9 @@ func main() {
 func openFile(file string) (*bufio.Scanner, *os.File) {
 	readFile, err := os.Open(file)
 	if err != nil {
-        fmt.Println(err)
-    }
-    fileScanner := bufio.NewScanner(readFile)
- 	fileScanner.Split(bufio.ScanLines)
+		fmt.Println(err)
+	}
+	fileScanner := bufio.NewScanner(readFile)
+	fileScanner.Split(bufio.ScanLines)
 	return fileScanner, readFile
 }

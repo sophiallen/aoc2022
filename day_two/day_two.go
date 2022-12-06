@@ -1,8 +1,8 @@
 package day_two
 
 import (
-    "bufio"
-    "fmt"
+	"bufio"
+	"fmt"
 	"strings"
 )
 
@@ -13,58 +13,58 @@ func (s Solution) GetDataPath() string {
 }
 
 const (
-	scoreWin = 6
-	scoreDraw = 3
-	scoreLose = 0
-	myRock = "X"
-	myPaper = "Y"
-	myScissors = "Z"
-	stratLose = "X"
-	stratDraw = "Y"
-	stratWin = "Z"
-	theirRock = "A"
-	theirPaper = "B"
+	scoreWin      = 6
+	scoreDraw     = 3
+	scoreLose     = 0
+	myRock        = "X"
+	myPaper       = "Y"
+	myScissors    = "Z"
+	stratLose     = "X"
+	stratDraw     = "Y"
+	stratWin      = "Z"
+	theirRock     = "A"
+	theirPaper    = "B"
 	theirScissors = "C"
 )
 
-var winningMoves = map[string]string {
-	theirRock: myPaper,
-	theirPaper: myScissors,
+var winningMoves = map[string]string{
+	theirRock:     myPaper,
+	theirPaper:    myScissors,
 	theirScissors: myRock,
 }
-var drawMoves = map[string]string {
-	theirRock: myRock,
-	theirPaper: myPaper,
+var drawMoves = map[string]string{
+	theirRock:     myRock,
+	theirPaper:    myPaper,
 	theirScissors: myScissors,
 }
-var losingMoves = map[string]string {
-	theirRock: myScissors,
-	theirPaper: myRock,
+var losingMoves = map[string]string{
+	theirRock:     myScissors,
+	theirPaper:    myRock,
 	theirScissors: myPaper,
 }
-var shapeScores = map[string]int {
-	myRock: 1,
-	myPaper: 2,
+var shapeScores = map[string]int{
+	myRock:     1,
+	myPaper:    2,
 	myScissors: 3,
 }
-var outcomeRock = map[string]int {
-	myRock: scoreDraw,
-	myPaper: scoreWin,
+var outcomeRock = map[string]int{
+	myRock:     scoreDraw,
+	myPaper:    scoreWin,
 	myScissors: scoreLose,
 }
-var outcomePaper = map[string]int {
-	myRock: scoreLose,
-	myPaper: scoreDraw,
+var outcomePaper = map[string]int{
+	myRock:     scoreLose,
+	myPaper:    scoreDraw,
 	myScissors: scoreWin,
 }
-var outcomeScissors = map[string]int {
-	myPaper: scoreLose,
-	myRock: scoreWin,
+var outcomeScissors = map[string]int{
+	myPaper:    scoreLose,
+	myRock:     scoreWin,
 	myScissors: scoreDraw,
 }
-var outcomes = map[string]map[string]int {
-	theirPaper: outcomePaper,
-	theirRock: outcomeRock,
+var outcomes = map[string]map[string]int{
+	theirPaper:    outcomePaper,
+	theirRock:     outcomeRock,
 	theirScissors: outcomeScissors,
 }
 
@@ -72,7 +72,7 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 	pt1Total := 0
 	pt2Total := 0
 	for scanner.Scan() {
-		moves := getMoves(scanner) 
+		moves := getMoves(scanner)
 		if len(moves) == 0 {
 			return
 		}
@@ -91,7 +91,7 @@ func getMoves(scanner *bufio.Scanner) []string {
 	}
 	return moves
 }
-func judgePt1(theirmove string, myMove string) int { 
+func judgePt1(theirmove string, myMove string) int {
 	return shapeScores[myMove] + outcomes[theirmove][myMove]
 }
 
