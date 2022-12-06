@@ -33,7 +33,6 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 		}
 		curElfTotalCals += calInt
 	}
-	checkLeaderBoard(curElfTotalCals, leaderBoard)
 	leadsTotal := 0
 	for _, cur := range leaderBoard {
 		leadsTotal += cur
