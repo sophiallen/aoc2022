@@ -3,7 +3,6 @@ package day_three
 import (
 	"bufio"
 	"fmt"
-	// "strings"
 )
 
 type Solution struct{}
@@ -19,10 +18,7 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 		badgeSum   = 0
 		curGroup   = make([]string, 3)
 	)
-	// sumOfTypes := 0
-	// curGroup := make([]string, 3)
-	// countGroup := 0
-	// badgeSum := 0
+
 	for scanner.Scan() {
 		text := scanner.Text()
 		// pt 1
@@ -46,23 +42,6 @@ func getRucksackPriority(text string) int {
 	priority := getPriority(common)
 	return priority
 }
-
-// func solvePartTwo(scanner *bufio.Scanner) {
-// 	curGroup := make([]string, 3)
-// 	countGroup := 0
-// 	badgeSum := 0
-// 	for scanner.Scan() {
-// 		idx := countGroup % 3
-// 		curGroup[idx] = scanner.Text()
-// 		if idx == 2 {
-// 			badge := getBadge(curGroup)
-// 			fmt.Printf("Badge is %+v\n", string(badge))
-// 			badgeSum += getPriority(badge)
-// 		}
-// 		countGroup += 1
-// 	}
-// 	fmt.Printf("\nSum is %+v\n", badgeSum)
-// }
 
 func getBadge(rucksacks []string) rune {
 	accum := map[rune]int{}
