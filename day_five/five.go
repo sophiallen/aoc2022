@@ -3,9 +3,9 @@ package day_five
 import (
 	"bufio"
 	"fmt"
-	"strings"
-	"strconv"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Solution struct{}
@@ -37,8 +37,8 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 			}
 			if len(line) > 0 {
 				// it's the column numbers line
-				cols := strings.ReplaceAll(line, " ", "")
-				numCols = len(cols)
+				colNames := strings.ReplaceAll(line, " ", "")
+				numCols = len(colNames)
 				continue
 			}
 			columns = initializeStacks(stackStrings, numCols)
@@ -46,12 +46,13 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 			continue
 		}
 		howMany, from, to := parseMove(line)
-		columns = moveMulti(howMany, from, to, columns)	
+		// columns = moveMulti(howMany, from, to, columns)	// pt1
+		columns = moveStack(howMany, from, to, columns) //pt2
 	}
 	topRow := make([]string, numCols)
 	for i, v := range columns {
 		topRow[i], _ = pop(v)
-	} 
+	}
 	fmt.Printf("Top Row: %+v\n", topRow)
 }
 
@@ -60,12 +61,20 @@ func parseMove(command string) (int, int, int) {
 	nums := regex.FindAllString(command, -1)
 	if nums == nil {
 		fmt.Println("Uh oh, something's wrong...")
-		return 0,0,0
+		return 0, 0, 0
 	}
 	howmany, _ := strconv.Atoi(nums[0])
 	from, _ := strconv.Atoi(nums[1])
 	to, _ := strconv.Atoi(nums[2])
-	return howmany, from -1, to -1
+	return howmany, from - 1, to - 1
+}
+
+func moveStack(howMany int, from int, to int, columns [][]string) [][]string {
+	valsToMove, fromCol := popX(columns[from], howMany)
+	toCol := append(columns[to], valsToMove...)
+	columns[from] = fromCol
+	columns[to] = toCol
+	return columns
 }
 
 func moveMulti(howMany int, from int, to int, columns [][]string) [][]string {
@@ -84,10 +93,17 @@ func moveSingle(from int, to int, columns [][]string) [][]string {
 }
 
 func pop(col []string) (string, []string) {
-	newLen := len(col) -1
+	newLen := len(col) - 1
 	value := col[newLen]
 	newCol := col[:newLen]
 	return value, newCol
+}
+
+func popX(col []string, x int) ([]string, []string) {
+	splitIndex := len(col) - x
+	substack := col[splitIndex:]
+	newCol := col[:splitIndex]
+	return substack, newCol
 }
 
 func initializeStacks(stackStrings []string, numCols int) [][]string {
