@@ -30,7 +30,7 @@ var solutions = map[int]Solvable{
 }
 
 func main() {
-	const day = 6
+	const day = 7
 	solution := solutions[day]
 	fileScanner, reader := openFile(solution.GetDataPath())
 	solution.Solve(fileScanner)
