@@ -11,6 +11,7 @@ import (
 	"aoc2022/day_six"
 	"aoc2022/day_ten"
 	"aoc2022/day_three"
+	"aoc2022/day_twelve"
 	"aoc2022/day_two"
 
 	"bufio"
@@ -35,10 +36,11 @@ var solutions = map[int]Solvable{
 	9:  day_nine.Solution{},
 	10: day_ten.Solution{},
 	11: day_eleven.Solution{},
+	12: day_twelve.Solution{},
 }
 
 func main() {
-	const day = 11
+	const day = 12
 	solution := solutions[day]
 	fileScanner, reader := openFile(solution.GetDataPath())
 	solution.Solve(fileScanner)
