@@ -76,11 +76,21 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 		}
 	}
 	fmt.Printf("farthest right %+v, farthest down %+v, farthest Left %+v\n", farthestRight, farthestDown, farthestLeft)
-
-	grid := make([][]string, farthestDown+1)
-	for i := 0; i < len(grid); i++ {
-		grid[i] = initRow(farthestRight + 1)
+	requiredMax := DROP_ZONE + farthestDown + 2
+	requiredMin := DROP_ZONE - farthestDown - 2
+	if farthestRight < requiredMax {
+		farthestRight = requiredMax
 	}
+	if farthestLeft > requiredMin {
+		farthestLeft = requiredMin
+	}
+	grid := make([][]string, farthestDown+3)
+	for i := 0; i < len(grid); i++ {
+		grid[i] = initRow(farthestRight+1, ".")
+	}
+	grid[len(grid)-1] = initRow(farthestRight+1, "#")
+
+	trimmedGrid := make([][]string, len(grid))
 
 	for _, p := range paths {
 		grid = chartPath(p, grid)
@@ -94,9 +104,9 @@ func (s Solution) Solve(scanner *bufio.Scanner) {
 	}
 	dropSand(grid, true)
 
-	trimmedGrid := make([][]string, farthestDown+1)
+	trimmedGrid = make([][]string, len(grid))
 	for i := range trimmedGrid {
-		trimmedGrid[i] = grid[i][farthestLeft:]
+		trimmedGrid[i] = grid[i][farthestLeft:farthestRight]
 	}
 	printGrid(trimmedGrid)
 
@@ -182,10 +192,10 @@ func chartPath(p Path, grid [][]string) [][]string {
 	return grid
 }
 
-func initRow(size int) []string {
+func initRow(size int, char string) []string {
 	row := make([]string, size)
 	for i := range row {
-		row[i] = "."
+		row[i] = char
 	}
 	return row
 }
@@ -193,6 +203,9 @@ func initRow(size int) []string {
 func dropSand(grid [][]string, trace bool) ([][]string, bool) {
 	fellIntoVoid := false
 	x, y := DROP_ZONE, 0
+	if isOccupied(grid[0][DROP_ZONE]) {
+		return grid, true
+	}
 
 	for y < len(grid) {
 		// fmt.Printf("Sand is at (%+v, %+v)\n", x, y)
@@ -227,11 +240,13 @@ func dropSand(grid [][]string, trace bool) ([][]string, bool) {
 		y--
 		break
 	}
+
 	fellIntoVoid = x >= len(grid[0]) || y >= len(grid)
-	if !fellIntoVoid {
+	hitTop := y < 0
+	if !fellIntoVoid && !hitTop {
 		grid[y][x] = "o"
 	}
-	return grid, fellIntoVoid
+	return grid, fellIntoVoid || hitTop
 }
 
 func isOccupied(space string) bool {
