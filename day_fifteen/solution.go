@@ -11,41 +11,117 @@ import (
 type Solution struct{}
 
 func (s Solution) GetDataPath() string {
-	return "day_fifteen/test.txt"
+	return "day_fifteen/data.txt"
+}
+
+const PT2_MIN = 0
+const PT2_MAX = 4000000
+
+type RowRange struct {
+	min int
+	max int
+}
+
+func (r RowRange) eclipses(r2 RowRange) bool {
+	return r.min <= r2.min && r.max >= r2.max
+}
+
+func (r RowRange) contains(num int) bool {
+	return r.min <= num && r.max >= num
 }
 
 func (s Solution) Solve(scanner *bufio.Scanner) {
-	sensorPositions := []Position{}
-	beaconPositions := []Position{}
-	var min, max Position
+	// sensorPositions := []Position{}
+	devices := map[string]bool{}
+	rowRanges := make([][]RowRange, PT2_MAX+1)
+	for i := range rowRanges {
+		rowRanges[i] = []RowRange{}
+	}
+	// min := PT2_MAX / 2
+	// max := PT2_MAX / 2
+	// targetRow := 10
 	// for each line in the file
 	for scanner.Scan() {
 		// get line of text as a string
 		line := scanner.Text()
-		// fmt.Println(line)
 		positions := strings.Split(line, ":")
-		sensorPos := lineToPosition(positions[0])
-		beaconPos := lineToPosition(positions[1])
+		sensorPos := lineToPosition(positions[0], "Sensor")
+		beaconPos := lineToPosition(positions[1], "Beacon")
+
+		devices[sensorPos.String()] = true
+		devices[beaconPos.String()] = true
 
 		sensorPos.SetNearest(beaconPos)
-		sensorPositions = append(sensorPositions, sensorPos)
-		beaconPositions = append(beaconPositions, beaconPos)
-		min, max = updateMinMax(sensorPos, min, max)
-		min, max = updateMinMax(beaconPos, min, max)
-	}
-	for _, p := range sensorPositions {
-		fmt.Println(p)
-	}
+		// sensorPositions = append(sensorPositions, sensorPos)
+		minRow := sensorPos.Row - sensorPos.Range
+		maxRow := sensorPos.Row + sensorPos.Range
+		if minRow < PT2_MIN {
+			minRow = PT2_MIN
+		}
+		if maxRow > PT2_MAX {
+			maxRow = PT2_MAX
+		}
+		for i := minRow; i <= maxRow; i++ {
+			mi, mx := rangeInRow(sensorPos, i)
+			rowRanges[i] = smush(rowRanges[i], RowRange{
+				min: mi,
+				max: mx,
+			})
+		}
 
-	fmt.Println("-------")
-	// for _, b := range beaconPositions {
-	// 	fmt.Println(b)
-	// }
-	fmt.Println("Min: ", min)
-	fmt.Println("Max: ", max)
+		// if touchesRow(sensorPos, targetRow) {
+		// 	mn, mx := rangeInRow(sensorPos, targetRow)
+		// 	if mn < min {
+		// 		min = mn
+		// 	}
+		// 	if mx > max {
+		// 		max = mx
+		// 	}
+		// }
+	}
+	// possibles := 0
+	// possibles = countPossible(min, max, targetRow, devices, sensorPositions)
+
+	distressSignal := Position{}
+	containGaps := 0
+	for i, r := range rowRanges {
+		if len(r) > 1 {
+			containGaps++
+			fmt.Printf("Num ranges is %+d\n", len(r))
+			gap := findGap(r)
+			if gap.min == gap.max {
+				distressSignal.Col = gap.min
+				distressSignal.Row = i
+			}
+		}
+	}
+	// fmt.Printf("Possibles: %d, min %d, max %d\n", possibles, min, max)
+	fmt.Printf("Num gaps: %d\n", containGaps)
+	fmt.Println("Distress signal:", distressSignal)
+	fmt.Println("Tuning:", (distressSignal.Col*4000000)+distressSignal.Row)
 }
 
-func lineToPosition(line string) Position {
+func countPossible(min int, max int, targetRow int, devices map[string]bool, sensorPositions []Position) int {
+	possibles := 0
+	for i := min; i <= max; i++ {
+		pos := Position{
+			Row: targetRow,
+			Col: i,
+		}
+		if devices[pos.String()] {
+			continue
+		}
+		for s := 0; s < len(sensorPositions); s++ {
+			if isInRange(pos, sensorPositions[s]) {
+				possibles++
+				break
+			}
+		}
+	}
+	return possibles
+}
+
+func lineToPosition(line string, thingType string) Position {
 	parts := strings.Split(line, ",")
 	xParts := strings.Split(parts[0], "x=")
 	yParts := strings.Split(parts[1], "y=")
@@ -58,15 +134,17 @@ func lineToPosition(line string) Position {
 		fmt.Printf("oops")
 	}
 	return Position{
-		Row: y,
-		Col: x,
+		Row:  y,
+		Col:  x,
+		Type: thingType,
 	}
 }
 
 type Position struct {
-	Row     int
-	Col     int
-	Nearest int
+	Row   int
+	Col   int
+	Range int
+	Type  string
 }
 
 func (p1 Position) ManhattanDist(p2 Position) int {
@@ -77,56 +155,130 @@ func (p1 Position) ManhattanDist(p2 Position) int {
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("(%d, %d) n=%d", p.Col, p.Row, p.Nearest)
+	return fmt.Sprintf("(%d, %d) n=%d", p.Col, p.Row, p.Range)
 }
 
 func (p *Position) SetNearest(nearby Position) {
-	p.Nearest = p.ManhattanDist(nearby)
+	p.Range = p.ManhattanDist(nearby)
 }
 
-// func chartSignal(p Position) [][]string {
-
-// }
-
-func updateMin(p1 Position, min Position) Position {
-	if p1.Col < min.Col {
-		min.Col = p1.Col
-	}
-	if p1.Row < min.Row {
-		min.Row = p1.Row
-	}
-	return min
+func isInRange(pointA Position, sensorPos Position) bool {
+	return sensorPos.ManhattanDist(pointA) <= sensorPos.Range
 }
 
-func updateMax(p1 Position, max Position) Position {
-	if p1.Col > max.Col {
-		max.Col = p1.Col
-	}
-	if p1.Row > max.Row {
-		max.Row = p1.Row
-	}
-	return max
+func touchesRow(sensor Position, row int) bool {
+	return sensor.Row+sensor.Range >= row && sensor.Row-sensor.Range <= row
 }
 
-func updateMinMax(p1 Position, min Position, max Position) (Position, Position) {
-	return updateMin(p1, min), updateMax(p1, max)
+func rangeInRow(sensor Position, row int) (int, int) {
+	intOffset := sensor.Row - row
+	offSet := math.Abs(float64(intOffset))
+	min := (sensor.Col - sensor.Range) + int(offSet)
+	max := (sensor.Col + sensor.Range) - int(offSet)
+	return min, max
 }
 
-func blankGrid(min Position, max Position) [][]string {
-	rows := max.Row - min.Row
-	cols := max.Col - min.Col
-
-	grid := make([][]string, rows)
-	for i := range grid {
-		grid[i] = initRow(cols, ".")
+func combineRanges(r1 RowRange, r2 RowRange) []RowRange {
+	if r1.eclipses(r2) {
+		return []RowRange{r1}
 	}
-	return grid
+	if r2.eclipses(r1) {
+		return []RowRange{r2}
+	}
+	// overlap with r1 on low end
+	if r1.max >= r2.min && r1.min < r2.min {
+		return []RowRange{
+			{
+				min: r1.min,
+				max: r2.max,
+			},
+		}
+	}
+	// overlap with r2 on low end
+	if r2.max >= r1.min && r2.min < r1.min {
+		return []RowRange{
+			{
+				min: r2.min,
+				max: r1.max,
+			},
+		}
+	}
+	// touching borders
+	if r1.max+1 == r2.min {
+		return []RowRange{
+			{
+				min: r1.min,
+				max: r2.max,
+			},
+		}
+	}
+	if r2.max+1 == r1.min {
+		return []RowRange{
+			{
+				min: r2.min,
+				max: r1.max,
+			},
+		}
+	}
+
+	// there's a gap
+	return []RowRange{r1, r2}
 }
 
-func initRow(cols int, char string) []string {
-	row := make([]string, cols)
-	for i := 0; i < cols; i++ {
-		row[i] = char
+func reduceRanges(ranges []RowRange) []RowRange {
+	i := 0
+	for i+1 < len(ranges) {
+		r1 := ranges[i]
+		r2 := ranges[i+1]
+		combined := combineRanges(r1, r2)
+		if len(combined) == 1 {
+			newRanges := append(ranges[:i], combined[0])
+			newRanges = append(newRanges, ranges[i+2:]...)
+			ranges = newRanges
+			continue
+		}
+		i++
 	}
-	return row
+	return ranges
+}
+
+func smush(current []RowRange, insert RowRange) []RowRange {
+	newRanges := make([]RowRange, len(current))
+	didCombine := false
+	for i, r := range current {
+		combined := combineRanges(insert, r)
+		if len(combined) == 1 {
+			newRanges[i] = combined[0]
+			didCombine = true
+			continue
+		}
+		newRanges[i] = r
+	}
+	if didCombine {
+		reduced := reduceRanges(newRanges)
+		for len(reduced) < len(newRanges) {
+			newRanges = reduced
+			reduced = reduceRanges(newRanges)
+		}
+		return reduced
+	}
+	return append(current, insert)
+}
+
+func findGap(ranges []RowRange) RowRange {
+	r1 := ranges[0]
+	r2 := ranges[1]
+	if r1.max < r2.min {
+		return RowRange{
+			min: r1.max + 1,
+			max: r2.min - 1,
+		}
+	}
+	if r2.max < r1.min {
+		return RowRange{
+			min: r2.max + 1,
+			max: r2.min - 1,
+		}
+	}
+	return RowRange{}
 }
